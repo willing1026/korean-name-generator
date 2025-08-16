@@ -14,7 +14,23 @@ button { cursor: pointer; }
 .card {
   background:#101827; border:1px solid #263446; padding:14px; border-radius:10px;
   display:flex; justify-content:space-between; align-items:center;
+  gap: 12px;   /* 이름과 버튼 사이 여백 */
 }
-.copy { border:none; background:#1b2838; padding:8px 10px; border-radius:8px; cursor:pointer; color:#cfe3ff; }
+.card span {
+  flex: 1;            /* 이름은 가능한 공간 차지 */
+  white-space: nowrap; /* 줄바꿈 방지 */
+  overflow: hidden;
+  text-overflow: ellipsis; /* 너무 길면 … 처리 */
+}
+.copy {
+  border:none; 
+  background:#1b2838; 
+  padding:6px 12px; 
+  border-radius:8px; 
+  cursor:pointer; 
+  color:#cfe3ff; 
+  width:auto;          /* 버튼이 글자만큼만 */
+  flex-shrink: 0;      /* 버튼이 줄어들지 않게 */
+}
 footer { margin-top: 32px; color:#6d8199; font-size: 12px; text-align:center; }
 .ad-container { margin: 20px 0; }
