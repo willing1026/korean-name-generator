@@ -1,49 +1,146 @@
 /* -------------------------------------------
-  외국인 한글이름 생성기 - 운영 버전 (영어이름 전용, JSON 로딩)
-  - 남/여 상위 이름 JSON(최근 3년 가중치) 로딩
-  - 성 자동 분포, 유지형 포함
-  - 성별: 자동/남/여/공용
+  Korean Name Generator (EN default, KO toggle)
+  - Loads male/female top names from JSON (last 3-year weighted)
+  - Korean surname distribution, kept-form support
+  - Gender: auto/male/female/unisex
+  - i18n: EN default, KO available; persists via localStorage
 ------------------------------------------- */
 
-// ========== DOM ==========
+// ===== i18n dictionary =====
+const I18N = {
+  en: {
+    "meta.title": "Korean Name Generator – Real Usage Distribution",
+    "meta.desc": "Type an English name to get Korean names commonly used in Korea (last 3-year weighted). Includes family name and kept-form options (e.g., Liam → 리암).",
+    "og.title": "Korean Name Generator",
+    "og.desc": "Real distribution-based suggestions + Korean family name + kept-form",
+
+    "hero.title": "Korean Name Generator",
+    "hero.subtitle": "English name → popular Korean names (last 3-year weighted) + Korean family name + kept-form",
+
+    "form.name": "English name",
+    "form.gender": "Gender",
+    "form.count": "Suggestions",
+    "gender.auto": "Auto",
+    "gender.male": "Male",
+    "gender.female": "Female",
+    "gender.unisex": "Unisex",
+    "cta.generate": "Generate",
+
+    "footer.privacy": "Privacy Policy",
+    "result.none": "No suggestions found.",
+    "btn.copy": "Copy",
+    "btn.copied": "Copied!"
+  },
+  ko: {
+    "meta.title": "외국인 한글이름 생성기 – 실제 분포 반영",
+    "meta.desc": "영문 이름을 입력하면 한국에서 실제 많이 쓰이는 이름(최근 3년 가중치)을 추천합니다. 성 포함, 유지형(예: Liam → 리암) 지원.",
+    "og.title": "외국인 한글이름 생성기",
+    "og.desc": "실제 분포 기반 추천 + 성 포함 + 유지형",
+
+    "hero.title": "외국인 한글이름 생성기",
+    "hero.subtitle": "영어 이름 → 실제 많이 쓰이는 한국식 이름(최근 3년 가중치) + 성 포함 + 유지형",
+
+    "form.name": "영문 이름",
+    "form.gender": "성별",
+    "form.count": "추천 개수",
+    "gender.auto": "자동 추정",
+    "gender.male": "남",
+    "gender.female": "여",
+    "gender.unisex": "공용",
+    "cta.generate": "이름 생성",
+
+    "footer.privacy": "개인정보처리방침",
+    "result.none": "추천 결과가 없습니다.",
+    "btn.copy": "복사",
+    "btn.copied": "복사됨!"
+  }
+};
+
+// ===== language state =====
 const $ = (s) => document.querySelector(s);
+const btnEN = $("#btn-en");
+const btnKO = $("#btn-ko");
+
+function getSavedLang() {
+  return localStorage.getItem("lang") || "en"; // default EN for foreigners
+}
+function setLang(lang) {
+  const dict = I18N[lang] || I18N.en;
+
+  // document lang
+  document.documentElement.lang = lang;
+
+  // Swap visible texts with data-i18n
+  document.querySelectorAll("[data-i18n]").forEach(el => {
+    const key = el.getAttribute("data-i18n");
+    if (!key) return;
+    const val = dict[key];
+    if (!val) return;
+
+    if (el.tagName === "META") {
+      el.setAttribute("content", val);
+    } else {
+      el.textContent = val;
+    }
+  });
+
+  // Update JSON-LD "name" dynamically
+  try {
+    const jsonld = document.getElementById("jsonld-website");
+    if (jsonld) {
+      const data = JSON.parse(jsonld.textContent);
+      data.name = dict["og.title"] || data.name;
+      jsonld.textContent = JSON.stringify(data);
+    }
+  } catch(e){ /* noop */ }
+
+  // Toggle button active UI
+  btnEN.classList.toggle("active", lang === "en");
+  btnKO.classList.toggle("active", lang === "ko");
+
+  localStorage.setItem("lang", lang);
+}
+btnEN?.addEventListener("click", () => setLang("en"));
+btnKO?.addEventListener("click", () => setLang("ko"));
+
+// Initialize language early
+setLang(getSavedLang());
+
+// ===== DOM (form) =====
 const enInput   = $("#enName");
 const genderSel = $("#gender");
 const countSel  = $("#count");
 const genBtn    = $("#genBtn");
 const resultsEl = $("#results");
 
-// ========== 데이터 로딩 ==========
+// ===== Data loading =====
 let MALE = [];
 let FEMALE = [];
-let UNISEX = []; // 로딩 후 동적으로 구성
+let UNISEX = [];
 
 async function loadData() {
   const [mRes, fRes] = await Promise.all([
-    fetch("data/male_top300.json"),
-    fetch("data/female_top300.json")
+    fetch("data/male_top300.json", {cache: "no-cache"}),
+    fetch("data/female_top300.json", {cache: "no-cache"})
   ]);
   MALE = await mRes.json();
   FEMALE = await fRes.json();
 
-  // 공용 이름 풀 만들기(두 리스트 교집합 + 일부 인기 이름)
+  // Build unisex pool (intersection + curated adds)
   const fSet = new Set(FEMALE.map(x=>x.n));
   const mSet = new Set(MALE.map(x=>x.n));
   const common = [...mSet].filter(n => fSet.has(n));
-  // 공용 후보 가중치는 양쪽 weight의 평균 정도로
   UNISEX = common.map(n => {
     const mw = MALE.find(x=>x.n===n)?.w || 1;
     const fw = FEMALE.find(x=>x.n===n)?.w || 1;
     return { n, w: Math.round((mw+fw)/2) };
   });
-
-  // 유니섹스 대표감 추가(연우/이안/지안/하율/아윤 등) 없으면 보강
   const addIfMissing = (name, w) => { if (!UNISEX.find(x=>x.n===name)) UNISEX.push({n:name, w}); };
   ["연우","이안","지안","하율","아윤","시온","윤서","수아","예린"].forEach(n=>addIfMissing(n,4));
 }
 loadData().catch(console.error);
 
-// ========== 성씨 분포 ==========
+// ===== Surname distribution =====
 const SURNAME_DISTR = [
   {n:"김", w:21}, {n:"이", w:15}, {n:"박", w:8}, {n:"최", w:5}, {n:"정", w:5},
   {n:"강", w:3}, {n:"조", w:2}, {n:"윤", w:2}, {n:"임", w:2}, {n:"한", w:1.5}
@@ -55,7 +152,7 @@ function pickSurname() {
   return "김";
 }
 
-// ========== 유지형 사전 + 폴백 음역 ==========
+// ===== Kept-form + fallback transliteration =====
 const KEPT_MAP = {
   "liam":"리암","noah":"노아","lucas":"루카스","oliver":"올리버","olivia":"올리비아",
   "emma":"에마","emily":"에밀리","ava":"에이바","mia":"미아","sophia":"소피아",
@@ -83,7 +180,7 @@ function keptCandidate(en){
   return KEPT_MAP[key] || fallbackTranslit(key);
 }
 
-// ========== 성별 힌트(간단) ==========
+// ===== Gender hint =====
 const EN_HINT_MALE = new Set(["michael","daniel","james","william","oliver","noah","liam","lucas","benjamin","henry","jack","david","ethan","samuel","alexander","theodore"]);
 const EN_HINT_FEMALE = new Set(["sophia","emma","emily","ava","isabella","mia","charlotte","olivia","amelia","harper","lily","ella","grace","hannah","victoria","sarah","natalie"]);
 function guessGender(en){
@@ -93,7 +190,7 @@ function guessGender(en){
   return "unisex";
 }
 
-// ========== 발음 키 ==========
+// ===== Phonetic key =====
 function phoneticKey(en){
   const s = (en||"").toLowerCase().replace(/[^a-z]/g,"");
   const v = (s.match(/[aeiou]+/g) || [])[0] || "";
@@ -110,12 +207,12 @@ function phoneticKey(en){
   };
 }
 
-// ========== 스코어링 ==========
+// ===== Scoring =====
 function scoreKName(kname, key, baseWeight){
   let s = 0;
   if (key.targetVowel && kname.includes(key.targetVowel)) s += 18;
   if (/아|이|오|우|에/.test(kname)) s += 6;
-  s += baseWeight * 6; // 최근3년 가중치 강조
+  s += baseWeight * 6; // last-3-year emphasis
   if (key.hasN && /[ㄴ]/.test(kname)) s += 3;
   if (key.hasM && /[ㅁ]/.test(kname)) s += 2;
   if (key.hasR && /[ㄹ]/.test(kname)) s += 2;
@@ -124,7 +221,7 @@ function scoreKName(kname, key, baseWeight){
   return s;
 }
 
-// ========== 추천 생성 ==========
+// ===== Recommend =====
 function recommend(en, opts){
   const {gender="auto", count=5, includeKept=true} = opts;
   const key = phoneticKey(en);
@@ -133,7 +230,7 @@ function recommend(en, opts){
   let pool = [];
   if (g==="male") pool = MALE.slice();
   else if (g==="female") pool = FEMALE.slice();
-  else pool = UNISEX.concat(MALE.slice(0,50), FEMALE.slice(0,50)); // 공용이면 얕게 혼합
+  else pool = UNISEX.concat(MALE.slice(0,50), FEMALE.slice(0,50)); // mild mix
 
   const scored = pool.map(x => ({...x, score: scoreKName(x.n, key, x.w)}))
                      .sort((a,b)=>b.score-a.score);
@@ -165,34 +262,41 @@ function recommend(en, opts){
   return finalGiven.map(given => `${surname} ${given}`);
 }
 
-// ========== 렌더 ==========
+// ===== Render =====
+function t(key){
+  const lang = localStorage.getItem("lang") || "en";
+  return (I18N[lang] && I18N[lang][key]) || I18N.en[key] || key;
+}
+
 function render(list){
   resultsEl.innerHTML = "";
   if (!list.length){
-    resultsEl.innerHTML = `<div class="card"><span>추천 결과가 없습니다.</span></div>`;
+    resultsEl.innerHTML = `<div class="card"><span>${t("result.none")}</span></div>`;
     return;
   }
   list.forEach(fullname => {
     const card = document.createElement("div");
     card.className = "card";
+
     const nameSpan = document.createElement("span");
     nameSpan.textContent = fullname;
 
     const btn = document.createElement("button");
     btn.className = "copy";
-    btn.textContent = "복사";
+    btn.textContent = t("btn.copy");
     btn.onclick = async () => {
       try {
         await navigator.clipboard.writeText(fullname);
         const old = btn.textContent;
-        btn.textContent = "복사됨!";
+        btn.textContent = t("btn.copied");
         setTimeout(()=>btn.textContent = old, 1200);
       } catch {
         const ta = document.createElement("textarea");
         ta.value = fullname; document.body.appendChild(ta);
         ta.select(); document.execCommand("copy");
         document.body.removeChild(ta);
-        btn.textContent = "복사됨!"; setTimeout(()=>btn.textContent="복사",1200);
+        btn.textContent = t("btn.copied");
+        setTimeout(()=>btn.textContent = t("btn.copy"),1200);
       }
     };
 
@@ -202,7 +306,7 @@ function render(list){
   });
 }
 
-// ========== 이벤트 ==========
+// ===== Events =====
 genBtn.addEventListener("click", () => {
   const en = (enInput.value || "").trim();
   const cnt = parseInt(countSel.value, 10) || 5;
