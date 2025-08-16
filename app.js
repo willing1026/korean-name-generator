@@ -335,16 +335,22 @@ function t(key){
 
 function render(list){
   resultsEl.innerHTML = "";
+  const lang = localStorage.getItem("lang") || "en";
+  const tNone = lang === "ko" ? "추천 결과가 없습니다." : "No suggestions found.";
+  const tCopy = lang === "ko" ? "복사" : "Copy";
+  const tCopied = lang === "ko" ? "복사됨!" : "Copied!";
+
   if (!list.length){
-    const msg = (localStorage.getItem("lang")||"en")==="ko" ? "추천 결과가 없습니다." : "No suggestions found.";
-    resultsEl.innerHTML = `<div class="card"><span>${msg}</span></div>`;
+    resultsEl.innerHTML = `<div class="card"><div class="name-wrap">${tNone}</div></div>`;
     return;
   }
+
   list.forEach(fullname => {
     const card = document.createElement("div");
     card.className = "card";
 
-    const nameWrap = document.createElement("span");
+    const nameWrap = document.createElement("div");   // ⬅︎ span → div 로 변경
+    nameWrap.className = "name-wrap";
     nameWrap.innerHTML = `
       <div class="ko-name">${fullname}</div>
       <div class="rom-name">${romanizeFullName(fullname)}</div>
@@ -352,18 +358,20 @@ function render(list){
 
     const btn = document.createElement("button");
     btn.className = "copy";
-    btn.textContent = (localStorage.getItem("lang")||"en")==="ko" ? "복사" : "Copy";
+    btn.textContent = tCopy;
     btn.onclick = async () => {
       try {
         await navigator.clipboard.writeText(fullname);
-        const copied = (localStorage.getItem("lang")||"en")==="ko" ? "복사됨!" : "Copied!";
-        const old = btn.textContent; btn.textContent = copied;
+        const old = btn.textContent;
+        btn.textContent = tCopied;
         setTimeout(()=>btn.textContent = old, 1200);
       } catch {
         const ta = document.createElement("textarea");
         ta.value = fullname; document.body.appendChild(ta);
         ta.select(); document.execCommand("copy");
         document.body.removeChild(ta);
+        btn.textContent = tCopied;
+        setTimeout(()=>btn.textContent = tCopy, 1200);
       }
     };
 
