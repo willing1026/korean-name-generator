@@ -27,8 +27,16 @@ button { cursor: pointer; }
   border:none; background:#1b2838; padding:8px 0;
   border-radius:8px; cursor:pointer; color:#cfe3ff;
 }
-footer { margin-top: 32px; color:#6d8199; font-size: 12px; text-align:center; }
-.ad-container { margin: 20px 0; }
+/* 이름(한글+영문) 영역 80% */
+.name-wrap {
+  flex: 0 0 80%;
+  white-space: normal;
+  word-break: break-word;
+}
 
+/* 한글/영문 줄 스타일 */
 .ko-name { font-weight: 600; line-height: 1.2; }
 .rom-name { opacity: .85; font-size: 0.95em; line-height: 1.2; margin-top: 2px; }
+
+footer { margin-top: 32px; color:#6d8199; font-size: 12px; text-align:center; }
+.ad-container { margin: 20px 0; }
