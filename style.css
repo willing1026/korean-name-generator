@@ -29,3 +29,6 @@ button { cursor: pointer; }
 }
 footer { margin-top: 32px; color:#6d8199; font-size: 12px; text-align:center; }
 .ad-container { margin: 20px 0; }
+
+.ko-name { font-weight: 600; line-height: 1.2; }
+.rom-name { opacity: .85; font-size: 0.95em; line-height: 1.2; margin-top: 2px; }
