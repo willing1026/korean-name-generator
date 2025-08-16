@@ -1,0 +1,20 @@
+:root { font-family: system-ui, -apple-system, Segoe UI, Roboto, sans-serif; }
+body { margin: 0; background: #0b0f14; color: #e6edf3; }
+.container { max-width: 880px; margin: 40px auto; padding: 24px; }
+h1 { margin: 0 0 6px; font-size: 28px; }
+.sub { color:#9db2c7; margin: 0 0 18px; }
+label { display: block; margin: 12px 0 6px; color: #9db2c7; }
+input, select, button {
+  padding: 10px 12px; border: 1px solid #2b3a4a; border-radius: 8px; background:#0f1520; color:#e6edf3; width: 100%;
+}
+.grid { display: grid; grid-template-columns: 2fr 1fr 1fr 1fr; gap: 14px; }
+@media (max-width: 760px){ .grid { grid-template-columns: 1fr 1fr; } }
+button { cursor: pointer; }
+.results { margin-top: 20px; display: grid; gap: 12px; }
+.card {
+  background:#101827; border:1px solid #263446; padding:14px; border-radius:10px;
+  display:flex; justify-content:space-between; align-items:center;
+}
+.copy { border:none; background:#1b2838; padding:8px 10px; border-radius:8px; cursor:pointer; color:#cfe3ff; }
+footer { margin-top: 32px; color:#6d8199; font-size: 12px; text-align:center; }
+.ad-container { margin: 20px 0; }
