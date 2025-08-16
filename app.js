@@ -1,12 +1,4 @@
-/* -------------------------------------------
-  Korean Name Generator (EN default, KO toggle)
-  - Loads male/female top names from JSON (last 3-year weighted)
-  - Korean surname distribution, kept-form support
-  - Gender: auto/male/female/unisex
-  - i18n: EN default, KO available; persists via localStorage
-------------------------------------------- */
-
-// ===== i18n dictionary =====
+/* ===== i18n - robust version ===== */
 const I18N = {
   en: {
     "meta.title": "Korean Name Generator – Real Usage Distribution",
@@ -18,6 +10,7 @@ const I18N = {
     "hero.subtitle": "English name → popular Korean names (last 3-year weighted) + Korean family name + kept-form",
 
     "form.name": "English name",
+    "form.placeholder": "e.g. Liam, Emma, Michael",
     "form.gender": "Gender",
     "form.count": "Suggestions",
     "gender.auto": "Auto",
@@ -41,6 +34,7 @@ const I18N = {
     "hero.subtitle": "영어 이름 → 실제 많이 쓰이는 한국식 이름(최근 3년 가중치) + 성 포함 + 유지형",
 
     "form.name": "영문 이름",
+    "form.placeholder": "예: Liam, Emma, Michael",
     "form.gender": "성별",
     "form.count": "추천 개수",
     "gender.auto": "자동 추정",
@@ -56,24 +50,16 @@ const I18N = {
   }
 };
 
-// ===== language state =====
 const $ = (s) => document.querySelector(s);
-const btnEN = $("#btn-en");
-const btnKO = $("#btn-ko");
 
 function getSavedLang() {
-  return localStorage.getItem("lang") || "en"; // default EN for foreigners
+  return localStorage.getItem("lang") || "en"; // 기본 EN
 }
-function setLang(lang) {
-  const dict = I18N[lang] || I18N.en;
 
-  // document lang
-  document.documentElement.lang = lang;
-
-  // Swap visible texts with data-i18n
+function applyI18N(dict){
+  // 일반 텍스트 노드 치환
   document.querySelectorAll("[data-i18n]").forEach(el => {
     const key = el.getAttribute("data-i18n");
-    if (!key) return;
     const val = dict[key];
     if (!val) return;
 
@@ -84,7 +70,25 @@ function setLang(lang) {
     }
   });
 
-  // Update JSON-LD "name" dynamically
+  // placeholder 치환
+  document.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    const key = el.getAttribute("data-i18n-placeholder");
+    const val = dict[key];
+    if (val) el.setAttribute("placeholder", val);
+  });
+
+  // <title> 안전하게 갱신
+  if (dict["meta.title"]) document.title = dict["meta.title"];
+
+  // meta description/OG 갱신(예: SEO용)
+  const mDesc = document.querySelector('meta[name="description"]');
+  if (mDesc && dict["meta.desc"]) mDesc.setAttribute("content", dict["meta.desc"]);
+  const ogTitle = document.querySelector('meta[property="og:title"]');
+  if (ogTitle && dict["og.title"]) ogTitle.setAttribute("content", dict["og.title"]);
+  const ogDesc = document.querySelector('meta[property="og:description"]');
+  if (ogDesc && dict["og.desc"]) ogDesc.setAttribute("content", dict["og.desc"]);
+
+  // JSON-LD name도 업데이트(선택)
   try {
     const jsonld = document.getElementById("jsonld-website");
     if (jsonld) {
@@ -92,19 +96,41 @@ function setLang(lang) {
       data.name = dict["og.title"] || data.name;
       jsonld.textContent = JSON.stringify(data);
     }
-  } catch(e){ /* noop */ }
+  } catch(e) { /* ignore */ }
+}
 
-  // Toggle button active UI
-  btnEN.classList.toggle("active", lang === "en");
-  btnKO.classList.toggle("active", lang === "ko");
+function setLang(lang) {
+  const dict = I18N[lang] || I18N.en;
+  document.documentElement.lang = lang;
+  applyI18N(dict);
 
+  // 버튼 active 토글
+  const btnEN = $("#btn-en");
+  const btnKO = $("#btn-ko");
+  if (btnEN && btnKO) {
+    btnEN.classList.toggle("active", lang === "en");
+    btnKO.classList.toggle("active", lang === "ko");
+  }
   localStorage.setItem("lang", lang);
 }
-btnEN?.addEventListener("click", () => setLang("en"));
-btnKO?.addEventListener("click", () => setLang("ko"));
 
-// Initialize language early
-setLang(getSavedLang());
+function initI18N(){
+  // 초기 언어 적용
+  setLang(getSavedLang());
+
+  // 버튼 리스너 연결 (DOM 준비 이후)
+  const btnEN = $("#btn-en");
+  const btnKO = $("#btn-ko");
+  if (btnEN) btnEN.addEventListener("click", () => setLang("en"));
+  if (btnKO) btnKO.addEventListener("click", () => setLang("ko"));
+}
+
+// DOMContentLoaded 보장 (defer 없어도 안전)
+if (document.readyState === "loading") {
+  document.addEventListener("DOMContentLoaded", initI18N);
+} else {
+  initI18N();
+}
 
 // ===== DOM (form) =====
 const enInput   = $("#enName");
