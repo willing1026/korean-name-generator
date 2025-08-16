@@ -59,7 +59,7 @@
     <form id="form" class="grid" onsubmit="return false;">
       <div>
         <label data-i18n="form.name">English name</label>
-        <input id="enName" placeholder="e.g. Liam, Emma, Michael" />
+        <input id="enName" placeholder="e.g. Liam, Emma, Michael" data-i18n-placeholder="form.placeholder" />
       </div>
       <div>
         <label data-i18n="form.gender">Gender</label>
@@ -89,6 +89,7 @@
     </footer>
   </main>
 
-  <script src="app.js"></script>
+  <!-- body 맨 아래에 이미 있다면 유지해도 되지만, 확실히 하려면 defer 권장 -->
+  <script src="app.js" defer></script>
 </body>
 </html>
