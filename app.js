@@ -288,6 +288,45 @@ function recommend(en, opts){
   return finalGiven.map(given => `${surname} ${given}`);
 }
 
+// ===== Hangul → Romanization (간단 RR 규칙) =====
+const CHO = ["g","kk","n","d","tt","r","m","b","pp","s","ss","","j","jj","ch","k","t","p","h"];
+const JUNG = ["a","ae","ya","yae","eo","e","yeo","ye","o","wa","wae","oe","yo","u","weo","we","wi","yu","eu","ui","i"];
+const JONG = ["","k","k","n","n","n","t","l","k","m","p","l","k","m","p","l","l","l","l","m","p","p","t","t","ng","t","t","k","t","p","t"];
+
+function hangulSyllableToRR(ch) {
+  const code = ch.charCodeAt(0);
+  if (code < 0xAC00 || code > 0xD7A3) return ch; // not Hangul
+  const idx = code - 0xAC00;
+  const cho = Math.floor(idx / 588);
+  const jung = Math.floor((idx % 588) / 28);
+  const jong = idx % 28;
+  return CHO[cho] + JUNG[jung] + JONG[jong];
+}
+
+function romanizeHangul(str) {
+  let out = "";
+  for (const ch of str) out += hangulSyllableToRR(ch);
+  // 보기 좋게 첫 글자 대문자화 + 'ui' 예외 보정 등 최소 손질
+  return out
+    .split(/\s+/).map(w => w ? (w[0].toUpperCase() + w.slice(1)) : w).join(" ")
+    .replace(/Ui/g, "Ui");
+}
+
+// 한국 성씨는 관용 표기 사용
+const SURNAME_ROMA = {
+  "김": "Kim","이": "Lee","박":"Park","최":"Choi","정":"Jung",
+  "강":"Kang","조":"Cho","윤":"Yoon","임":"Lim","한":"Han"
+};
+
+function romanizeFullName(korFull) {
+  const [sur, ...rest] = korFull.split(/\s+/);
+  const given = rest.join(" ");
+  const surRoma = SURNAME_ROMA[sur] || romanizeHangul(sur);
+  const givenRoma = romanizeHangul(given).replace(/\s+/g,"");
+  // 일반적으로 'Kim Seoa' 형태(이름은 붙여 쓰는 경우도 많지만 가독성 위해 띄어쓰기 유지)
+  return `${surRoma} ${givenRoma}`;
+}
+
 // ===== Render =====
 function t(key){
   const lang = localStorage.getItem("lang") || "en";
@@ -297,36 +336,38 @@ function t(key){
 function render(list){
   resultsEl.innerHTML = "";
   if (!list.length){
-    resultsEl.innerHTML = `<div class="card"><span>${t("result.none")}</span></div>`;
+    const msg = (localStorage.getItem("lang")||"en")==="ko" ? "추천 결과가 없습니다." : "No suggestions found.";
+    resultsEl.innerHTML = `<div class="card"><span>${msg}</span></div>`;
     return;
   }
   list.forEach(fullname => {
     const card = document.createElement("div");
     card.className = "card";
 
-    const nameSpan = document.createElement("span");
-    nameSpan.textContent = fullname;
+    const nameWrap = document.createElement("span");
+    nameWrap.innerHTML = `
+      <div class="ko-name">${fullname}</div>
+      <div class="rom-name">${romanizeFullName(fullname)}</div>
+    `;
 
     const btn = document.createElement("button");
     btn.className = "copy";
-    btn.textContent = t("btn.copy");
+    btn.textContent = (localStorage.getItem("lang")||"en")==="ko" ? "복사" : "Copy";
     btn.onclick = async () => {
       try {
         await navigator.clipboard.writeText(fullname);
-        const old = btn.textContent;
-        btn.textContent = t("btn.copied");
+        const copied = (localStorage.getItem("lang")||"en")==="ko" ? "복사됨!" : "Copied!";
+        const old = btn.textContent; btn.textContent = copied;
         setTimeout(()=>btn.textContent = old, 1200);
       } catch {
         const ta = document.createElement("textarea");
         ta.value = fullname; document.body.appendChild(ta);
         ta.select(); document.execCommand("copy");
         document.body.removeChild(ta);
-        btn.textContent = t("btn.copied");
-        setTimeout(()=>btn.textContent = t("btn.copy"),1200);
       }
     };
 
-    card.appendChild(nameSpan);
+    card.appendChild(nameWrap);
     card.appendChild(btn);
     resultsEl.appendChild(card);
   });
