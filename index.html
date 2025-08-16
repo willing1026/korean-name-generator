@@ -1,25 +1,26 @@
 <!doctype html>
-<html lang="ko">
+<html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>외국인 한글이름 생성기 – 실제 분포 반영</title>
-  <meta name="description" content="영어 이름을 입력하면 한국에서 실제 많이 쓰이는 이름 분포를 반영해 추천합니다. 성 포함, 유지형(리암/노아) 지원." />
-  <link rel="canonical" href="https://willing1026.github.io/korean-name-generator/" />
+  <title data-i18n="meta.title">Korean Name Generator – Real Usage Distribution</title>
+  <meta name="description" data-i18n="meta.desc"
+        content="Type an English name to get Korean names commonly used in Korea (last 3-year weighted). Includes family name and kept-form options (e.g., Liam → 리암)." />
+  <link rel="canonical" href="https://USERNAME.github.io/" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
 
-  <!-- (승인 후 교체) AdSense 전역 스크립트 -->
+  <!-- (After approval) AdSense global script -->
   <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossorigin="anonymous"></script> -->
 
-  <meta property="og:title" content="외국인 한글이름 생성기" />
-  <meta property="og:description" content="실제 분포 기반 추천 + 성 포함 + 유지형" />
+  <meta property="og:title" data-i18n="og.title" content="Korean Name Generator" />
+  <meta property="og:description" data-i18n="og.desc" content="Real distribution-based suggestions + Korean family name + kept-form" />
   <meta property="og:type" content="website" />
 
-  <script type="application/ld+json">
+  <script type="application/ld+json" id="jsonld-website">
   {
     "@context":"https://schema.org",
     "@type":"WebSite",
     "url":"https://USERNAME.github.io/",
-    "name":"외국인 한글이름 생성기",
+    "name":"Korean Name Generator",
     "potentialAction":{
       "@type":"SearchAction",
       "target":"https://USERNAME.github.io/?q={name}&gender={gender}",
@@ -29,41 +30,61 @@
   </script>
 
   <link rel="stylesheet" href="style.css" />
+  <style>
+    /* 작은 CSS만 추가: 언어 스위처 위치 */
+    .topbar {
+      display:flex; justify-content:flex-end; align-items:center;
+      gap:8px; margin-bottom:8px;
+    }
+    .lang-btn {
+      padding:6px 10px; border:1px solid #2b3a4a; background:#0f1520; color:#e6edf3;
+      border-radius:8px; cursor:pointer;
+    }
+    .lang-btn.active { outline:2px solid #5878ff; }
+  </style>
 </head>
 <body>
   <main class="container">
-    <h1>외국인 한글이름 생성기</h1>
-    <p class="sub">영어 이름 → 한국에서 실제 많이 쓰이는 이름(최근 3년 가중치) + 성 포함 + 유지형</p>
+    <!-- Language switcher -->
+    <div class="topbar">
+      <button class="lang-btn" id="btn-en">EN</button>
+      <button class="lang-btn" id="btn-ko">KO</button>
+    </div>
+
+    <h1 data-i18n="hero.title">Korean Name Generator</h1>
+    <p class="sub" data-i18n="hero.subtitle">
+      English name → popular Korean names (last 3-year weighted) + Korean family name + kept-form
+    </p>
 
     <form id="form" class="grid" onsubmit="return false;">
       <div>
-        <label>영문 이름</label>
+        <label data-i18n="form.name">English name</label>
         <input id="enName" placeholder="e.g. Liam, Emma, Michael" />
       </div>
       <div>
-        <label>성별</label>
+        <label data-i18n="form.gender">Gender</label>
         <select id="gender">
-          <option value="auto">자동 추정</option>
-          <option value="male">남</option>
-          <option value="female">여</option>
-          <option value="unisex">공용</option>
+          <option value="auto" data-i18n="gender.auto">Auto</option>
+          <option value="male" data-i18n="gender.male">Male</option>
+          <option value="female" data-i18n="gender.female">Female</option>
+          <option value="unisex" data-i18n="gender.unisex">Unisex</option>
         </select>
       </div>
       <div>
-        <label>추천 개수</label>
+        <label data-i18n="form.count">Suggestions</label>
         <select id="count">
           <option>3</option><option selected>5</option><option>8</option>
         </select>
       </div>
       <div style="align-self:end">
-        <button id="genBtn">이름 생성</button>
+        <button id="genBtn" data-i18n="cta.generate">Generate</button>
       </div>
     </form>
 
     <section id="results" class="results"></section>
 
     <footer>
-      <a href="privacy.html">개인정보처리방침</a> ·
+      <a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a> ·
       <a href="https://github.com/USERNAME/USERNAME.github.io" target="_blank">GitHub</a>
     </footer>
   </main>
