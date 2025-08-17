@@ -40,3 +40,24 @@ button { cursor: pointer; }
 
 footer { margin-top: 32px; color:#6d8199; font-size: 12px; text-align:center; }
 .ad-container { margin: 20px 0; }
+
+
+/* ===== SEO content blocks ===== */
+.seo-content { margin-top: 36px; padding-top: 8px; border-top: 1px solid #223142; }
+.seo-content h2 { margin: 20px 0 10px; font-size: 22px; }
+.seo-content h3 { margin: 14px 0 8px; font-size: 18px; color:#cfe3ff; }
+.seo-content p { margin: 8px 0; color:#c9d7e3; line-height: 1.6; }
+.seo-content ul { margin: 8px 0 12px 18px; padding: 0; }
+.seo-content li { margin: 6px 0; }
+
+/* ===== On-page FAQ ===== */
+.faq { margin-top: 28px; }
+.faq-item { background:#0f1520; border:1px solid #263446; border-radius:10px; padding:14px; margin:10px 0; }
+.faq-item h3 { margin: 0 0 6px; font-size: 18px; }
+.faq-item p { margin: 0; color:#b8c7d8; }
+
+/* small screens */
+@media (max-width:760px){
+  .seo-content h2 { font-size:20px; }
+  .seo-content h3 { font-size:16px; }
+}
