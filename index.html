@@ -2,49 +2,83 @@
 <html lang="en">
 <head>
   <meta charset="utf-8" />
+
+  <!-- ===== Canonical / hreflang (다국어 단일 페이지) ===== -->
+  <link rel="canonical" href="https://willing1026.github.io/korean-name-generator/" />
+  <!-- 커스텀 도메인 사용 시 아래 2줄도 추가하세요 -->
+  <!-- <link rel="canonical" href="https://YOUR-DOMAIN/" /> -->
+
+  <!-- 동일 URL에서 언어 토글이므로 ?lang 파라미터로 대체 hreflang 제공 -->
+  <link rel="alternate" href="https://willing1026.github.io/korean-name-generator/?lang=en" hreflang="en" />
+  <link rel="alternate" href="https://willing1026.github.io/korean-name-generator/?lang=ko" hreflang="ko" />
+  <link rel="alternate" href="https://willing1026.github.io/korean-name-generator/" hreflang="x-default" />
+
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#0b0f14" />
+
+  <!-- ===== 기본 SEO 메타 ===== -->
   <title data-i18n="meta.title">Korean Name Generator – Real Usage Distribution</title>
   <meta name="description" data-i18n="meta.desc"
         content="Type an English name to get Korean names commonly used in Korea (last 3-year weighted). Includes family name and kept-form options (e.g., Liam → 리암)." />
-  <link rel="canonical" href="https://USERNAME.github.io/" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="keywords" content="Korean name generator, Hangul name, Korean surname, Romanization, English to Korean name" />
 
-  <!-- (After approval) AdSense global script -->
-  <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossorigin="anonymous"></script> -->
-
+  <!-- ===== Open Graph / Twitter ===== -->
+  <meta property="og:type" content="website" />
   <meta property="og:title" data-i18n="og.title" content="Korean Name Generator" />
   <meta property="og:description" data-i18n="og.desc" content="Real distribution-based suggestions + Korean family name + kept-form" />
-  <meta property="og:type" content="website" />
+  <meta property="og:url" content="https://willing1026.github.io/korean-name-generator/" />
+  <meta property="og:image" content="https://willing1026.github.io/korean-name-generator/og-image.png" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" data-i18n="og.title" content="Korean Name Generator" />
+  <meta name="twitter:description" data-i18n="og.desc" content="Real distribution-based suggestions + Korean family name + kept-form" />
+  <meta name="twitter:image" content="https://willing1026.github.io/korean-name-generator/og-image.png" />
 
+  <!-- ===== PWA/아이콘(선택) ===== -->
+  <link rel="icon" href="/favicon.ico" sizes="any">
+  <link rel="apple-touch-icon" href="/apple-touch-icon.png">
+
+  <!-- ===== Structured Data (WebSite + WebApplication) ===== -->
   <script type="application/ld+json" id="jsonld-website">
   {
     "@context":"https://schema.org",
     "@type":"WebSite",
-    "url":"https://USERNAME.github.io/",
+    "url":"https://willing1026.github.io/korean-name-generator/",
     "name":"Korean Name Generator",
     "potentialAction":{
       "@type":"SearchAction",
-      "target":"https://USERNAME.github.io/?q={name}&gender={gender}",
+      "target":"https://willing1026.github.io/korean-name-generator/?q={name}&gender={gender}",
       "query-input":"required name=name"
     }
   }
   </script>
+  <script type="application/ld+json">
+  {
+    "@context":"https://schema.org",
+    "@type":"WebApplication",
+    "name":"Korean Name Generator",
+    "url":"https://willing1026.github.io/korean-name-generator/",
+    "applicationCategory":"Utility",
+    "operatingSystem":"All",
+    "description":"Generate realistic Korean names from English names using recent 3-year popularity distribution with Korean surnames and kept-form options."
+  }
+  </script>
+
+  <!-- (AdSense 승인 후 교체) 전역 스크립트 -->
+  <!-- <script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-XXXX" crossorigin="anonymous"></script> -->
 
   <link rel="stylesheet" href="style.css" />
   <style>
-    /* 작은 CSS만 추가: 언어 스위처 위치 */
-    .topbar {
-      display:flex; justify-content:flex-end; align-items:center;
-      gap:8px; margin-bottom:8px;
-    }
-    .lang-btn {
-      padding:6px 10px; border:1px solid #2b3a4a; background:#0f1520; color:#e6edf3;
-      border-radius:8px; cursor:pointer;
-    }
-    .lang-btn.active { outline:2px solid #5878ff; }
+    /* 언어 스위처 */
+    .topbar{display:flex;justify-content:flex-end;align-items:center;gap:8px;margin-bottom:8px}
+    .lang-btn{padding:6px 10px;border:1px solid #2b3a4a;background:#0f1520;color:#e6edf3;border-radius:8px;cursor:pointer}
+    .lang-btn.active{outline:2px solid #5878ff}
+    /* (JS off 대비) */
+    noscript .js-note{display:block;margin:8px 0;color:#ffb4b4}
   </style>
 </head>
 <body>
   <main class="container">
+
     <!-- Language switcher -->
     <div class="topbar">
       <button class="lang-btn" id="btn-en">EN</button>
@@ -85,10 +119,26 @@
 
     <footer>
       <a href="privacy.html" data-i18n="footer.privacy">Privacy Policy</a> ·
+      <a href="https://github.com/USERNAME/USERNAME.github.io" target="_blank" rel="noopener">GitHub</a>
     </footer>
+
+    <noscript>
+      <p class="js-note">This site needs JavaScript enabled to work. / 자바스크립트를 켜주세요.</p>
+    </noscript>
   </main>
 
-  <!-- body 맨 아래에 이미 있다면 유지해도 되지만, 확실히 하려면 defer 권장 -->
+  <!-- JS는 defer로: i18n/DOM 안전 로드 -->
   <script src="app.js" defer></script>
+
+  <!-- ===== URL의 ?lang 파라미터로 초기 언어 동기화(선택) ===== -->
+  <script>
+    (function(){
+      const usp = new URLSearchParams(location.search);
+      const lp = usp.get('lang');
+      if (lp === 'en' || lp === 'ko') {
+        localStorage.setItem('lang', lp);
+      }
+    })();
+  </script>
 </body>
 </html>
