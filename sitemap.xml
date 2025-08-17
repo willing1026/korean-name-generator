@@ -1,5 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://USERNAME.github.io/</loc></url>
-  <url><loc>https://USERNAME.github.io/privacy.html</loc></url>
+  <!-- 기본(언어 무관) -->
+  <url><loc>https://willing1026.github.io/korean-name-generator/</loc></url>
+
+  <!-- 언어 변형 URL -->
+  <url><loc>https://willing1026.github.io/korean-name-generator/?lang=en</loc></url>
+  <url><loc>https://willing1026.github.io/korean-name-generator/?lang=ko</loc></url>
+
+  <!-- 정적 하위 페이지(있다면): -->
+  <url><loc>https://willing1026.github.io/korean-name-generator/privacy.html</loc></url>
 </urlset>
