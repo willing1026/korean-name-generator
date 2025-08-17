@@ -104,6 +104,11 @@ function setLang(lang) {
   document.documentElement.lang = lang;
   applyI18N(dict);
 
+  // ▼ 현재 언어를 URL에 반영 (링크 공유/크롤러 친화)
+  const url = new URL(location.href);
+  url.searchParams.set('lang', lang);
+  history.replaceState({}, '', url.toString());
+
   // 버튼 active 토글
   const btnEN = $("#btn-en");
   const btnKO = $("#btn-ko");
