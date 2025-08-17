@@ -398,3 +398,13 @@ genBtn.addEventListener("click", () => {
   });
   render(list);
 });
+
+// 이름 생성 버튼 클릭 이벤트
+document.getElementById('genBtn').addEventListener('click', () => {
+  if (typeof gtag !== "undefined") {
+    gtag('event', 'generate_click', {
+      'event_category': 'interaction',
+      'event_label': 'name_generator'
+    });
+  }
+});
